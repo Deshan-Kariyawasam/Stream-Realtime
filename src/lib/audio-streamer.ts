@@ -47,32 +47,47 @@ export class AudioStreamer {
     workletSrc: string,
     handler: T,
   ): Promise<this> {
+    if (!this.context) {
+      throw new Error('AudioContext is not initialized.');
+    }
+  
+    if (!this.context.audioWorklet) {
+      throw new Error('AudioWorklet is not supported in this browser.');
+    }
+  
+    console.log('Adding worklet:', workletName, workletSrc);
+  
     let workletsRecord = registeredWorklets.get(this.context);
     if (workletsRecord && workletsRecord[workletName]) {
-      // the worklet already exists on this context
-      // add the new handler to it
       workletsRecord[workletName].handlers.push(handler);
       return Promise.resolve(this);
-      //throw new Error(`Worklet ${workletName} already exists on context`);
     }
-
+  
     if (!workletsRecord) {
       registeredWorklets.set(this.context, {});
       workletsRecord = registeredWorklets.get(this.context)!;
     }
-
-    // create new record to fill in as becomes available
+  
     workletsRecord[workletName] = { handlers: [handler] };
-
+  
     const src = createWorketFromSrc(workletName, workletSrc);
-    await this.context.audioWorklet.addModule(src);
-    const worklet = new AudioWorkletNode(this.context, workletName);
-
-    //add the node into the map
-    workletsRecord[workletName].node = worklet;
-
+    console.log(`Worklet source URL: ${src}`);
+    if (!src) {
+      throw new Error(`Failed to create worklet source for ${workletName}`);
+    }
+  
+    try {
+      await this.context.audioWorklet.addModule(src);
+      const worklet = new AudioWorkletNode(this.context, workletName);
+      workletsRecord[workletName].node = worklet;
+    } catch (error) {
+      console.error('Failed to add worklet:', error);
+      throw error;
+    }
+  
     return this;
   }
+  
 
   addPCM16(chunk: Uint8Array) {
     const float32Array = new Float32Array(chunk.length / 2);
