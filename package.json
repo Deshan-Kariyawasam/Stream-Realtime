@@ -59,6 +59,6 @@
     "typescript": "^5.7.2"
   },
   "overrides": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.6.3"
   }
 }
