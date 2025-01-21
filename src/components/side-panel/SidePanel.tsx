@@ -75,7 +75,7 @@ export default function SidePanel() {
   return (
     <div className={`side-panel ${open ? "open" : ""}`}>
       <header className="top">
-        <h2>Stream Realtime</h2>
+      <img src="Adventa-Logo-D.png"></img>
         {open ? (
           <button className="opener" onClick={() => setOpen(false)}>
             <RiSidebarFoldLine color="#b4b8bb" />
